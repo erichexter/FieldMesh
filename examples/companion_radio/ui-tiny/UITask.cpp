@@ -505,7 +505,8 @@ void UITask::msgRead(int msgcount) {
   }
 }
 
-void UITask::newMsg(uint8_t path_len, const char* from_name, const char* text, int msgcount) {
+void UITask::newMsg(uint8_t path_len, const char* from_name, const char* text, int msgcount,
+                    bool is_favorite, const char* channel_name) {
   _msgcount = msgcount;
 
   if (_display != NULL) {

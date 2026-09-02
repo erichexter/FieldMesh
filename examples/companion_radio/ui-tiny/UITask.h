@@ -101,7 +101,12 @@ public:
 
   // from AbstractUITask
   void msgRead(int msgcount) override;
-  void newMsg(uint8_t path_len, const char* from_name, const char* text, int msgcount) override;
+  // Signature must track AbstractUITask::newMsg, which gained is_favorite and channel_name.
+  // ui-tiny was not updated when it did, so it stopped satisfying the interface and
+  // main.cpp could not instantiate UITask at all. ui-tiny ignores both -- it has no favourites
+  // row and no channel column -- but it must still accept them.
+  void newMsg(uint8_t path_len, const char* from_name, const char* text, int msgcount,
+              bool is_favorite = false, const char* channel_name = nullptr) override;
   void notify(UIEventType t = UIEventType::none) override;
   void loop() override;
 
