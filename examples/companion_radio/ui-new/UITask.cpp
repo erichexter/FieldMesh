@@ -138,6 +138,8 @@ class HomeScreen : public UIScreen {
     SENSORS,
 #endif
     SOS,     // V3: SOS page (after GPS, before count)
+    SHUTDOWN,  // power off. ui-new had _shutdown_init and the poll() check but no page and no
+               // KEY_ENTER case, so powerOff() was unreachable -- see FLEET.md.
     Count    // keep as last
   };
 
@@ -640,6 +642,23 @@ public:
       display.setColor(DisplayDriver::LIGHT);
       display.setTextSize(1);
       display.drawTextCentered(display.width() / 2, display.height() - 13, "SOS: " PRESS_LABEL);
+
+    } else if (_page == HomePage::SHUTDOWN) {
+      // Deliberately TEXT-led, not icon-led. On a 200x200 e-ink the 32x32 icons for advert and
+      // power are indistinguishable at arm's length -- Hex could not tell which page he was on.
+      display.setColor(DisplayDriver::RED);
+      if (_shutdown_init) {
+        display.setTextSize(2);
+        display.drawTextCentered(display.width() / 2, display.height() / 2 - 8, "HIBERNATING");
+      } else {
+        display.setTextSize(3);
+        display.drawTextCentered(display.width() / 2, 30, "POWER");
+        display.drawTextCentered(display.width() / 2, 62, "OFF");
+        display.setColor(DisplayDriver::LIGHT);
+        display.setTextSize(1);
+        display.drawTextCentered(display.width() / 2, display.height() - 13,
+                                 "hibernate: " PRESS_LABEL);
+      }
     }
     return 5000;   // next render after 5000 ms
   }
@@ -679,6 +698,10 @@ public:
       return true;
     }
 #endif
+    if (c == KEY_ENTER && _page == HomePage::SHUTDOWN) {
+      _shutdown_init = true;   // poll() waits for the button to be released, then shuts down
+      return true;
+    }
     return false;
   }
 
